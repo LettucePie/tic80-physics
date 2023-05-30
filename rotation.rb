@@ -284,16 +284,44 @@ def dim_area(dim, rot, sca)
 	bot_left = scale_vec(top_right, -1)
 	top_left = vec_rotated(top_left, rot + (PI / 2))
 	bot_right = scale_vec(top_left, -1)
-	# Displace corners by center position.
-	top_right = add_vecs(center, top_right)
-	bot_left = add_vecs(center, bot_left)
-	top_left = add_vecs(center, top_left)
-	bot_right = add_vecs(center, bot_right)
-	
+	# Displace by center.
+	top_right = add_vecs(top_right, center)
+	top_left = add_vecs(top_left, center)
+	bot_right = add_vecs(bot_right, center)
+	bot_left = add_vecs(bot_left, center)
+	# Draw corners.
 	pix(top_right[0], top_right[1], 1)
 	pix(bot_left[0], bot_left[1], 2)
 	pix(top_left[0], top_left[1], 3)
 	pix(bot_right[0], bot_right[1], 4)
+	# Build Line Vectors
+	tl_tr = sub_vecs(top_right, top_left)
+	tl_tr_mag = vec_mag(tl_tr)
+	tl_tr_dir = normalize(tl_tr)
+	tl_bl = sub_vecs(bot_left, top_left)
+	tl_bl_mag = vec_mag(tl_bl)
+	tl_bl_dir = normalize(tl_bl)
+	# Draw Lines by iterating over
+	# the magnitude of the edges of
+	# the area. Traveling the normalized
+	# direcion each time, then placing
+	# a point.
+	point = top_left
+	(2..tl_tr_mag).each{
+	|n|
+	point = add_vecs(point, tl_tr_dir)
+	pix(point[0], point[1], 5)
+	offset = add_vecs(point, tl_bl)
+	pix(offset[0], offset[1], 5)
+	}
+	point = top_left
+	(2..tl_bl_mag).each{
+	|n|
+	point = add_vecs(point, tl_bl_dir)
+	pix(point[0], point[1], 6)
+	offset = add_vecs(point, tl_tr)
+	pix(offset[0], offset[1], 6)
+	}
 end
 # <TILES>
 # 001:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
