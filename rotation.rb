@@ -235,7 +235,11 @@ def TIC
 	if $objects.size > 0 then
 		$objects.each{
 		|obj|
+		obj[SCA] = obj[SCA] + 0.01
 		obj[ROT] = obj[ROT] + PI * 0.01
+		if obj[SCA] >= 4 then
+			obj[SCA] = 0.4
+		end
 		if obj[ROT] >= (PI * 2) then
 			obj[ROT] = 0.0
 		end
@@ -267,15 +271,20 @@ end
 
 
 def dim_area(dim, rot, sca)
+	# Establish working Corners and Center.
 	center = [40, 40]
 	top_right = dim
 	top_left = [dim[0] * -1, dim[1]]
-	
-	top_right = vec_rotated(dim, rot)
+	# Scale primary corners by sca.
+	top_right = scale_vec(top_right, sca)
+	top_left = scale_vec(top_left, sca)
+	# Rotate primary corners and flip
+	# for opposing corners.
+	top_right = vec_rotated(top_right, rot)
 	bot_left = scale_vec(top_right, -1)
 	top_left = vec_rotated(top_left, rot + (PI / 2))
 	bot_right = scale_vec(top_left, -1)
-	
+	# Displace corners by center position.
 	top_right = add_vecs(center, top_right)
 	bot_left = add_vecs(center, bot_left)
 	top_left = add_vecs(center, top_left)
