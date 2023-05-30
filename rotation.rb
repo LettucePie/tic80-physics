@@ -309,19 +309,38 @@ def dim_area(dim, rot, sca)
 	point = top_left
 	(2..tl_tr_mag).each{
 	|n|
-	point = add_vecs(point, tl_tr_dir)
-	pix(point[0], point[1], 5)
-	offset = add_vecs(point, tl_bl)
-	pix(offset[0], offset[1], 5)
+		point = add_vecs(point, tl_tr_dir)
+		pix(point[0], point[1], 5)
+		offset = add_vecs(point, tl_bl)
+		pix(offset[0], offset[1], 5)
 	}
 	point = top_left
 	(2..tl_bl_mag).each{
 	|n|
-	point = add_vecs(point, tl_bl_dir)
-	pix(point[0], point[1], 6)
-	offset = add_vecs(point, tl_tr)
-	pix(offset[0], offset[1], 6)
+		point = add_vecs(point, tl_bl_dir)
+		pix(point[0], point[1], 6)
+		offset = add_vecs(point, tl_tr)
+		pix(offset[0], offset[1], 6)
 	}
+	# Fill Area by iterating over
+	# a grid made out of the two edge
+	# magnitudes.
+	reso_x = 2
+	reso_y = 2
+	sharp_x = scale_vec(tl_tr_dir, 0.5)
+	sharp_y = scale_vec(tl_bl_dir, 0.5)
+	point = top_left
+	offset = point
+ (1..tl_bl_mag * reso_y).each{
+	|y|
+		point = add_vecs(point, sharp_y)
+		offset = point
+ 	(1..tl_tr_mag * reso_x).each{
+  |x|
+  	offset = add_vecs(offset, sharp_x)
+   pix(offset[0], offset[1], 7)
+  } 
+ }
 end
 # <TILES>
 # 001:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
