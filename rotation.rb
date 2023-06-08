@@ -276,7 +276,7 @@ def proc_draw()
   $objects.each{ |obj|
     pos = obj[POS]
     draw = obj[DRW]
-    area = dim_area(obj[POS], draw[DIM], obj[ROT], obj[SCA])
+    area = dim_corners(obj[POS], draw[DIM], obj[ROT], obj[SCA])
     if draw[TYP] == CRC then
     	up = lerp2(area[TLC], area[TRC], 0.5)
      down = lerp2(area[BLC], area[BRC], 0.5)
@@ -301,8 +301,14 @@ def proc_draw()
    		outline.each{ |point|
      	pix(point[0], point[1], draw[COLO])
      }
+     if draw[FIL] then
+     	area = dim_area(area)
+     end
     end
     if draw[TYP] == RCT then
+    		if draw[FIL] then
+      	area = dim_area(area)
+      end
       area[AREA].each{ |point|
       	pix(point[0], point[1], draw[COLO])
       }
@@ -311,7 +317,7 @@ def proc_draw()
 end
 
 
-def dim_area(center, dim, rot, sca)
+def dim_corners(center, dim, rot, sca)
 		area = {}
 		area[AREA] = []
   # Establish working Corners.
@@ -338,11 +344,16 @@ def dim_area(center, dim, rot, sca)
   area[BRC] = bot_right
   area[AREA] += [top_right, top_left,
    bot_right, bot_left]
+  return area
+end
+
+
+def dim_area(area)
   # Build Line Vectors
-  tl_tr = sub_vecs(top_right, top_left)
+  tl_tr = sub_vecs(area[TRC], area[TLC])
   tl_tr_mag = vec_mag(tl_tr)
   tl_tr_dir = normalize(tl_tr)
-  tl_bl = sub_vecs(bot_left, top_left)
+  tl_bl = sub_vecs(area[BLC], area[TLC])
   tl_bl_mag = vec_mag(tl_bl)
   tl_bl_dir = normalize(tl_bl)
   # Draw Lines by iterating over
@@ -350,14 +361,14 @@ def dim_area(center, dim, rot, sca)
   # the area. Traveling the normalized
   # direcion each time, then placing
   # a point.
-  point = top_left
+  point = area[TLC]
   (2..tl_tr_mag).each{ |n|
     point = add_vecs(point, tl_tr_dir)
     area[AREA]<<point
     offset = add_vecs(point, tl_bl)
 				area[AREA]<<offset
   }
-  point = top_left
+  point = area[TLC]
   (2..tl_bl_mag).each{ |n|
     point = add_vecs(point, tl_bl_dir)
 				area[AREA]<<point
@@ -371,7 +382,7 @@ def dim_area(center, dim, rot, sca)
   reso_y = 2
   sharp_x = scale_vec(tl_tr_dir, 0.5)
   sharp_y = scale_vec(tl_bl_dir, 0.5)
-  point = top_left
+  point = area[TLC]
   offset = point
   (1..tl_bl_mag * reso_y).each{ |y|
     point = add_vecs(point, sharp_y)
