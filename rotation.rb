@@ -35,6 +35,13 @@ SPR = "sprite"
 FIL = "fill"
 COLO = "color"
 SHT = "sheet"
+# Drawable Area
+AREA = "area"
+CEN = "center"
+TLC = "topleftcorner"
+TRC = "toprightcorner"
+BLC = "bottomleftcorner"
+BRC = "bottomrightcorner"
 
 
 ###
@@ -56,13 +63,13 @@ $objects = []
 # Tag Array
 # Draw Instruction
 def object(at_pos, sca, rot, tags, draw)
-	return {
-		POS => at_pos,
-		SCA => sca,
-  ROT => rot,
-		TAG => tags,
-		DRW => draw
-		}
+  return {
+    POS => at_pos,
+    SCA => sca,
+    ROT => rot,
+    TAG => tags,
+    DRW => draw
+    }
 end
 
 
@@ -78,22 +85,22 @@ end
 # Useful for instructing multiple ...
 # objects with the same anim command
 def sheet()
-	
+  
 end
 
 
 # Defines params for basic circles
 # and rects to be drawn.
 def drawable_basic(
-	type, dimension, fill, color)
+  type, dimension, fill, color)
  if type == CRC \
  or type == RCT then
- 	return{
+   return{
    TYP => type,
    DIM => dimension,
    FIL => fill,
    COLO => color
-  	}
+    }
  end	
 end
 
@@ -101,8 +108,8 @@ end
 # Defines params for sprites to be
 # drawn.
 def drawable_spr(
-	dimension, sheet, anim)
-	trace("Nope")
+  dimension, sheet, anim)
+  trace("Nope")
 end
 
 
@@ -112,96 +119,103 @@ end
 
 
 def lerp1(a, b, l)
-	return a + (b - a) * l.clamp(0, 1)
+  return a + (b - a) * l.clamp(0, 1)
 end
 
 
 def lerp2(a, b, l)
-	return [
-		a[0] + (b[0] - a[0]) * l.clamp(0, 1),
-		a[1] + (b[1] - a[1]) * l.clamp(0, 1)
-	]
+  return [
+    a[0] + (b[0] - a[0]) * l.clamp(0, 1),
+    a[1] + (b[1] - a[1]) * l.clamp(0, 1)
+  ]
+end
+
+
+def quad_bez(a, b, c, l)
+	q0 = lerp2(a, b, l)
+	q1 = lerp2(b, c, l)
+	return lerp2(q0, q1, l)
 end
 
 
 def dir_to(a, b)
-	return normalize(sub_vecs(b, a))
+  return normalize(sub_vecs(b, a))
 end
 
 
 def add_vecs(a, b)
-	return[
-		a[0] + b[0],
-		a[1] + b[1]
-	]
+  return[
+    a[0] + b[0],
+    a[1] + b[1]
+  ]
 end
 
 
 def sub_vecs(a, b)
-	return add_vecs(a, scale_vec(b, -1.0))
+  return add_vecs(a, scale_vec(b, -1.0))
 end
 
 
 def vec_mag(vec)
-	return Math.sqrt(
-		(vec[0] * vec[0])\
-		+
-		(vec[1] * vec[1])
-	)
+  return Math.sqrt(
+    (vec[0] * vec[0])\
+    +
+    (vec[1] * vec[1])
+  )
 end
 
 
 def normalize(vec)
-	mag = vec_mag(vec)
-	if mag > 0 then
-		return [vec[0] / mag, vec[1] / mag]
-	end
+  mag = vec_mag(vec)
+  if mag > 0 then
+    return [vec[0] / mag, vec[1] / mag]
+  end
 end
 
 
 def multiply_vecs(a, b)
-	return[
-		a[0] * b[0],
-		a[1] * b[1]
-	]
+  return[
+    a[0] * b[0],
+    a[1] * b[1]
+  ]
 end
 
 
 def scale_vec(vec, sca)
-	return[
-		vec[0] * sca,
-		vec[1] * sca
-	]
+  return[
+    vec[0] * sca,
+    vec[1] * sca
+  ]
 end
 
 
 def vec_rotated(vec, rot)
-	sin = Math.sin(rot)
-	cos = Math.cos(rot)
-	return[
-		vec[0] * cos - vec[1] * sin,
-		vec[0] * sin + vec[1] * cos
-	]
+  sin = Math.sin(rot)
+  cos = Math.cos(rot)
+  return[
+    vec[0] * cos - vec[1] * sin,
+    vec[0] * sin + vec[1] * cos
+  ]
 end
 
 
 def aabb(p1, d1, p2, d2)
-	return (
-		p1[0] < p2[0] + d2[0] and \
-		p2[0] < p1[0] + d1[0] and \
-		p1[1] < p2[1] + d2[1] and \
-		p2[1] < p1[1] + d1[1]
-	)	
+  return (
+    p1[0] < p2[0] + d2[0] and \
+    p2[0] < p1[0] + d1[0] and \
+    p1[1] < p2[1] + d2[1] and \
+    p2[1] < p1[1] + d1[1]
+  )	
 end
 
 
 def dist(a, b)
-	v = sub_vecs(a, b)
-	return Math.sqrt(
-		(v[0] * v[0])\
-		+ 
-		(v[1] * v[1])
-	)
+  v = sub_vecs(a, b)
+  return Math.sqrt(
+    (v[0] * v[0])\
+    + 
+    (v[1] * v[1])
+  )
 end
 
 
@@ -216,7 +230,11 @@ def BOOT
  # a height of 5. Set to be filled
  # with a color code of 3.
  object1_draw = drawable_basic(
-     RCT, [10, 5], true, 3
+   RCT, [10, 5], true, 3
+ )
+ # Do the Same, but with a Circle
+ object2_draw = drawable_basic(
+ 		CRC, [10, 5], true, 5
  )
  # Create an object at position
  # 50x 50y, with a scale of 1
@@ -224,123 +242,146 @@ def BOOT
  # a tag of just 'rectangle', 
  # and finally the drawable
  object1_obj = object(
-     [50, 50], 1, 0.1, ["rectangle"], object1_draw
+   [50, 50], 1, 0.1, ["rectangle"], object1_draw
+ )
+ # Again instantiating the Circle Object
+ object2_obj = object(
+ 		[120, 50], 1, 0.1, ["circle"], object2_draw
  )
  $objects<<(object1_obj)
+ $objects<<(object2_obj)
 end
 
 
 def TIC
-	cls()
-	if $objects.size > 0 then
-		$objects.each{
-		|obj|
-		obj[SCA] = obj[SCA] + 0.01
-		obj[ROT] = obj[ROT] + PI * 0.01
-		if obj[SCA] >= 4 then
-			obj[SCA] = 0.4
-		end
-		if obj[ROT] >= (PI * 2) then
-			obj[ROT] = 0.0
-		end
-		}
-		proc_draw()
-	end
+  cls()
+  if $objects.size > 0 then
+    $objects.each{ |obj|
+    obj[SCA] = obj[SCA] + 0.01
+    obj[ROT] = obj[ROT] + PI * 0.01
+    if obj[SCA] >= 4 then
+      obj[SCA] = 0.4
+    end
+    if obj[ROT] >= (PI * 2) then
+      obj[ROT] = 0.0
+    end
+    }
+    proc_draw()
+  end
 end
 
 
 # Processes Drawing given data.
 def proc_draw()
-	$objects.each{
-		|obj|
-		pos = obj[POS]
-		draw = obj[DRW]
-		if draw[TYP] == CRC then
-			circ(
-				pos[0], pos[1],
-				draw[RAD], draw[COLO]
-			) 
-		end
-		if draw[TYP] == RCT then
-			dim_area(
-				draw[DIM], obj[ROT], obj[SCA]
-				) 
-		end
-	}
+  $objects.each{ |obj|
+    pos = obj[POS]
+    draw = obj[DRW]
+    area = dim_area(obj[POS], draw[DIM], obj[ROT], obj[SCA])
+    if draw[TYP] == CRC then
+    	up = lerp2(area[TLC], area[TRC], 0.5)
+     down = lerp2(area[BLC], area[BRC], 0.5)
+     left = lerp2(area[BLC], area[TLC], 0.5)
+     right = lerp2(area[BRC], area[TRC], 0.5)
+     reso = dist(area[BLC], area[TRC])
+     top_left_arc = []
+     top_right_arc = []
+     bot_left_arc = []
+     bot_right_arc = []
+     (1..reso).each{ |p|
+     	percent = p.to_f / reso.to_f
+      top_left_arc<<quad_bez(left, area[TLC], up, percent)
+      top_right_arc<<quad_bez(up, area[TRC], right, percent)
+      bot_right_arc<<quad_bez(right, area[BRC], down, percent)
+      bot_left_arc<<quad_bez(down, area[BLC], left, percent)
+     }
+     outline = top_left_arc \
+     	+ top_right_arc \
+      + bot_left_arc \
+      + bot_right_arc
+   		outline.each{ |point|
+     	pix(point[0], point[1], draw[COLO])
+     }
+    end
+    if draw[TYP] == RCT then
+      area[AREA].each{ |point|
+      	pix(point[0], point[1], draw[COLO])
+      }
+    end
+  }
 end
 
 
-def dim_area(dim, rot, sca)
-	# Establish working Corners and Center.
-	center = [40, 40]
-	top_right = dim
-	top_left = [dim[0] * -1, dim[1]]
-	# Scale primary corners by sca.
-	top_right = scale_vec(top_right, sca)
-	top_left = scale_vec(top_left, sca)
-	# Rotate primary corners and flip
-	# for opposing corners.
-	top_right = vec_rotated(top_right, rot)
-	bot_left = scale_vec(top_right, -1)
-	top_left = vec_rotated(top_left, rot + (PI / 2))
-	bot_right = scale_vec(top_left, -1)
-	# Displace by center.
-	top_right = add_vecs(top_right, center)
-	top_left = add_vecs(top_left, center)
-	bot_right = add_vecs(bot_right, center)
-	bot_left = add_vecs(bot_left, center)
-	# Draw corners.
-	pix(top_right[0], top_right[1], 1)
-	pix(bot_left[0], bot_left[1], 2)
-	pix(top_left[0], top_left[1], 3)
-	pix(bot_right[0], bot_right[1], 4)
-	# Build Line Vectors
-	tl_tr = sub_vecs(top_right, top_left)
-	tl_tr_mag = vec_mag(tl_tr)
-	tl_tr_dir = normalize(tl_tr)
-	tl_bl = sub_vecs(bot_left, top_left)
-	tl_bl_mag = vec_mag(tl_bl)
-	tl_bl_dir = normalize(tl_bl)
-	# Draw Lines by iterating over
-	# the magnitude of the edges of
-	# the area. Traveling the normalized
-	# direcion each time, then placing
-	# a point.
-	point = top_left
-	(2..tl_tr_mag).each{
-	|n|
-		point = add_vecs(point, tl_tr_dir)
-		pix(point[0], point[1], 5)
-		offset = add_vecs(point, tl_bl)
-		pix(offset[0], offset[1], 5)
-	}
-	point = top_left
-	(2..tl_bl_mag).each{
-	|n|
-		point = add_vecs(point, tl_bl_dir)
-		pix(point[0], point[1], 6)
-		offset = add_vecs(point, tl_tr)
-		pix(offset[0], offset[1], 6)
-	}
-	# Fill Area by iterating over
-	# a grid made out of the two edge
-	# magnitudes.
-	reso_x = 2
-	reso_y = 2
-	sharp_x = scale_vec(tl_tr_dir, 0.5)
-	sharp_y = scale_vec(tl_bl_dir, 0.5)
-	point = top_left
-	offset = point
- (1..tl_bl_mag * reso_y).each{
-	|y|
-		point = add_vecs(point, sharp_y)
-		offset = point
- 	(1..tl_tr_mag * reso_x).each{
-  |x|
-  	offset = add_vecs(offset, sharp_x)
-   pix(offset[0], offset[1], 7)
-  } 
- }
+def dim_area(center, dim, rot, sca)
+		area = {}
+		area[AREA] = []
+  # Establish working Corners.
+  top_right = dim
+  top_left = [dim[0] * -1, dim[1]]
+  # Scale primary corners by sca.
+  top_right = scale_vec(top_right, sca)
+  top_left = scale_vec(top_left, sca)
+  # Rotate primary corners and flip
+  # for opposing corners.
+  top_right = vec_rotated(top_right, rot)
+  bot_left = scale_vec(top_right, -1)
+  top_left = vec_rotated(top_left, rot + (PI / 2))
+  bot_right = scale_vec(top_left, -1)
+  # Displace by center.
+  top_right = add_vecs(top_right, center)
+  top_left = add_vecs(top_left, center)
+  bot_right = add_vecs(bot_right, center)
+  bot_left = add_vecs(bot_left, center)
+  # Draw corners.
+  area[TRC] = top_right
+  area[BLC] = bot_left
+  area[TLC] = top_left
+  area[BRC] = bot_right
+  area[AREA] += [top_right, top_left,
+   bot_right, bot_left]
+  # Build Line Vectors
+  tl_tr = sub_vecs(top_right, top_left)
+  tl_tr_mag = vec_mag(tl_tr)
+  tl_tr_dir = normalize(tl_tr)
+  tl_bl = sub_vecs(bot_left, top_left)
+  tl_bl_mag = vec_mag(tl_bl)
+  tl_bl_dir = normalize(tl_bl)
+  # Draw Lines by iterating over
+  # the magnitude of the edges of
+  # the area. Traveling the normalized
+  # direcion each time, then placing
+  # a point.
+  point = top_left
+  (2..tl_tr_mag).each{ |n|
+    point = add_vecs(point, tl_tr_dir)
+    area[AREA]<<point
+    offset = add_vecs(point, tl_bl)
+				area[AREA]<<offset
+  }
+  point = top_left
+  (2..tl_bl_mag).each{ |n|
+    point = add_vecs(point, tl_bl_dir)
+				area[AREA]<<point
+    offset = add_vecs(point, tl_tr)
+				area[AREA]<<offset
+  }
+  # Fill Area by iterating over
+  # a grid made out of the two edge
+  # magnitudes.
+  reso_x = 2
+  reso_y = 2
+  sharp_x = scale_vec(tl_tr_dir, 0.5)
+  sharp_y = scale_vec(tl_bl_dir, 0.5)
+  point = top_left
+  offset = point
+  (1..tl_bl_mag * reso_y).each{ |y|
+    point = add_vecs(point, sharp_y)
+    offset = point
+    (1..tl_tr_mag * reso_x).each{ |x|
+      offset = add_vecs(offset, sharp_x)
+     	area[AREA]<<offset
+    }     
+  }
+  return area
 end
 # <TILES>
 # 001:eccccccccc888888caaaaaaaca888888cacccccccacc0ccccacc0ccccacc0ccc
