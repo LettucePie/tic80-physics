@@ -278,32 +278,24 @@ def proc_draw()
     draw = obj[DRW]
     area = dim_corners(obj[POS], draw[DIM], obj[ROT], obj[SCA])
     if draw[TYP] == CRC then
-    	up = lerp2(area[TLC], area[TRC], 0.5)
-     down = lerp2(area[BLC], area[BRC], 0.5)
-     left = lerp2(area[BLC], area[TLC], 0.5)
-     right = lerp2(area[BRC], area[TRC], 0.5)
-     reso = dist(area[BLC], area[TRC])
-     top_left_arc = []
-     top_right_arc = []
-     bot_left_arc = []
-     bot_right_arc = []
-     (1..reso).each{ |p|
-     	percent = p.to_f / reso.to_f
-      top_left_arc<<quad_bez(left, area[TLC], up, percent)
-      top_right_arc<<quad_bez(up, area[TRC], right, percent)
-      bot_right_arc<<quad_bez(right, area[BRC], down, percent)
-      bot_left_arc<<quad_bez(down, area[BLC], left, percent)
-     }
-     outline = top_left_arc \
-     	+ top_right_arc \
-      + bot_left_arc \
-      + bot_right_arc
-   		outline.each{ |point|
+    	ring = dim_ring(area[TLC], area[TRC], area[BLC], area[BRC])
+     if draw[FIL] then
+     	distance = dist(area[CEN], area[TLC])
+     	(1..distance).each{ |p|
+      	percent = p.to_f / distance.to_f
+      	scaled = [
+       	lerp2(area[CEN], area[TLC], percent),
+        lerp2(area[CEN], area[TRC], percent),
+        lerp2(area[CEN], area[BLC], percent),
+        lerp2(area[CEN], area[BRC], percent)
+       ]
+     		ring += dim_ring(scaled[0], scaled[1], scaled[2], scaled[3])
+      }
+     end
+    
+   		ring.each{ |point|
      	pix(point[0], point[1], draw[COLO])
      }
-     if draw[FIL] then
-     	area = dim_area(area)
-     end
     end
     if draw[TYP] == RCT then
     		if draw[FIL] then
@@ -320,6 +312,7 @@ end
 def dim_corners(center, dim, rot, sca)
 		area = {}
 		area[AREA] = []
+		area[CEN] = center
   # Establish working Corners.
   top_right = dim
   top_left = [dim[0] * -1, dim[1]]
@@ -345,6 +338,30 @@ def dim_corners(center, dim, rot, sca)
   area[AREA] += [top_right, top_left,
    bot_right, bot_left]
   return area
+end
+
+
+def dim_ring(tlc, trc, blc, brc)
+	up = lerp2(tlc, trc, 0.5)
+ down = lerp2(blc, brc, 0.5)
+ left = lerp2(blc, tlc, 0.5)
+ right = lerp2(brc, trc, 0.5)
+ reso = dist(blc, trc)
+ top_left_arc = []
+ top_right_arc = []
+ bot_left_arc = []
+ bot_right_arc = []
+ (1..reso).each{ |p|
+ 	percent = p.to_f / reso.to_f
+  top_left_arc<<quad_bez(left, tlc, up, percent)
+  top_right_arc<<quad_bez(up, trc, right, percent)
+  bot_right_arc<<quad_bez(right, brc, down, percent)
+  bot_left_arc<<quad_bez(down, blc, left, percent)
+ }
+ return top_left_arc \
+ 	+ top_right_arc \
+  + bot_left_arc \
+  + bot_right_arc
 end
 
 
