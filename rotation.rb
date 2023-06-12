@@ -234,7 +234,7 @@ def BOOT
  )
  # Do the Same, but with a Circle
  object2_draw = drawable_basic(
- 		CRC, [10, 5], true, 5
+ 		CRC, [10, 5], false, 5
  )
  # Create an object at position
  # 50x 50y, with a scale of 1
@@ -278,7 +278,7 @@ def proc_draw()
     draw = obj[DRW]
     area = dim_corners(obj[POS], draw[DIM], obj[ROT], obj[SCA])
     if draw[TYP] == CRC then
-    	ring = dim_ring(area[TLC], area[TRC], area[BLC], area[BRC])
+    	ring = dim_semi_crc(area[TLC], area[TRC], area[BLC], area[BRC])
      if draw[FIL] then
      	distance = dist(area[CEN], area[TLC])
      	(1..distance).each{ |p|
@@ -362,6 +362,56 @@ def dim_ring(tlc, trc, blc, brc)
  	+ top_right_arc \
   + bot_left_arc \
   + bot_right_arc
+end
+
+
+def dim_semi_crc(tlc, trc, blc, brc)
+	area = []
+	up = lerp2(tlc, trc, 0.5)
+ down = lerp2(blc, brc, 0.5)
+ left = lerp2(blc, tlc, 0.5)
+ right = lerp2(brc, trc, 0.5)
+ center = lerp2(down, up, 0.5)
+ vert_norm = dir_to(down, up)
+ vert_vec = sub_vecs(up, down)
+ vert_count = vec_mag(vert_vec).round
+ hort_norm = dir_to(left, right)
+ v_point = down
+ i = 0
+ (1..vert_count).each{ |v|
+ 	h_point = v_point
+  area<<h_point
+  vert_journey = v / vert_count
+  a = down
+  b = blc
+  c = left
+  if vert_journey >= 0.5 then
+  	vert_journey -= 0.5
+  	a = left
+   b = tlc
+   c = up
+  end
+  hort_target = quad_bez(a, b, c, vert_journey / 0.5)
+ 	hort_vec = sub_vecs(hort_target, v_point)
+ 	hort_count = vec_mag(hort_vec).round
+  if hort_count > 0 then
+  	(1..hort_count).each{ |h|
+   	h_point = add_vecs(h_point, hort_norm)
+    area<<h_point
+   }
+  end
+  v_point = add_vecs(v_point, vert_norm)
+  trace("Run " + i.to_s)
+  trace("v_point " + v_point.to_s)
+  trace("hort_target " + hort_target.to_s)
+  trace("hort_vec " + hort_vec.to_s)
+  trace("hort_count " + hort_count.to_s)
+  i += 1
+ }
+ hort_vec = sub_vecs(right, left)
+ hort_count = vec_mag(hort_vec).round
+ reso = dist(blc, trc)
+ return area
 end
 
 
