@@ -376,28 +376,38 @@ def dim_semi_crc(tlc, trc, blc, brc)
  vert_vec = sub_vecs(up, down)
  vert_count = vec_mag(vert_vec).round
  hort_norm = dir_to(left, right)
+ hort_norm_flipped = dir_to(right, left)
  v_point = down
  i = 0
  (1..vert_count).each{ |v|
  	h_point = v_point
+  h_flip = h_point
   area<<h_point
-  vert_journey = v / vert_count
+  vert_journey = v.to_f / vert_count.to_f
+  scaling_down = false
   a = down
   b = blc
   c = left
   if vert_journey >= 0.5 then
   	vert_journey -= 0.5
+   scaling_down = true
   	a = left
    b = tlc
    c = up
   end
+ 	trace("Scaling Down : " + scaling_down.to_s)
+  trace("V Value : " + v.to_s)
+  trace("vert_count : " + vert_count.to_s)
+  trace("Vertical Journey : " + vert_journey.to_s)
   hort_target = quad_bez(a, b, c, vert_journey / 0.5)
  	hort_vec = sub_vecs(hort_target, v_point)
  	hort_count = vec_mag(hort_vec).round
   if hort_count > 0 then
   	(1..hort_count).each{ |h|
    	h_point = add_vecs(h_point, hort_norm)
+    h_flip = add_vecs(h_flip, hort_norm_flipped)
     area<<h_point
+    area<<h_flip
    }
   end
   v_point = add_vecs(v_point, vert_norm)
